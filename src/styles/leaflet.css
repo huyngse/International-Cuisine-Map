@@ -1,0 +1,4 @@
+.leaflet-interactive {
+  transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease,
+    fill-opacity 0.3s ease;
+}

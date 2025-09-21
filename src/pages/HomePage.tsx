@@ -1,21 +1,17 @@
-import { MapContainer, Marker, Popup, GeoJSON } from "react-leaflet";
+import { MapContainer, ZoomControl } from "react-leaflet";
 import worldData from "@/data/custom.geo.json";
-import type { Feature, FeatureCollection, Geometry } from "geojson";
-import { stringToColor } from "@/lib/color";
+import type { FeatureCollection } from "geojson";
+import Country from "@/components/Country";
+import { useState } from "react";
 
 const typedWorldData = worldData as FeatureCollection;
 
-
 const HomePage = () => {
-  const style = (feature?: Feature<Geometry, any>) => {
-    const name = feature?.properties?.name ?? "unknown";
-    return {
-      fillColor: stringToColor(name),
-      weight: 1,
-      color: "white",
-      fillOpacity: 0.7,
-    };
-  };
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+
+  const selectedFeature = typedWorldData.features.find(
+    (f) => f.properties?.name === selectedCountry
+  );
 
   return (
     <main className="caret-amber-200">
@@ -30,11 +26,29 @@ const HomePage = () => {
           [90, 180],
         ]}
         maxBoundsViscosity={1.0}
+        zoomControl={false}
       >
-        <GeoJSON data={typedWorldData} style={style} />
-        <Marker position={[35.6895, 139.6917]}>
-          <Popup>こんにちは！ This is Tokyo! 🗼</Popup>
-        </Marker>
+        {typedWorldData.features
+          .filter((f) => f.properties?.name !== selectedCountry)
+          .map((feature, i) => (
+            <Country
+              key={i}
+              feature={feature}
+              isSelected={false}
+              onSelect={(name) => setSelectedCountry(name)}
+            />
+          ))}
+
+        {selectedFeature && (
+          <Country
+            key={selectedFeature.properties?.name}
+            feature={selectedFeature}
+            isSelected={true}
+            onSelect={(name) => setSelectedCountry(name)}
+          />
+        )}
+
+        <ZoomControl position="bottomright" />
       </MapContainer>
     </main>
   );
