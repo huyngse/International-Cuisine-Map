@@ -1,6 +1,5 @@
 import { stringToColor, stringToGray } from "@/lib/color";
 import type { Feature, Geometry } from "geojson";
-import { useRef } from "react";
 import { GeoJSON, useMap } from "react-leaflet";
 
 interface CountryProps {
@@ -11,7 +10,6 @@ interface CountryProps {
 
 const Country = ({ feature, isSelected, onSelect }: CountryProps) => {
   const map = useMap();
-  const geoJsonRef = useRef<L.GeoJSON>(null);
   const name = feature.properties?.name ?? "unknown";
 
   const grayStyle = {
@@ -31,10 +29,14 @@ const Country = ({ feature, isSelected, onSelect }: CountryProps) => {
   return (
     <GeoJSON
       key={name}
-      ref={geoJsonRef}
       data={feature}
       style={() => (isSelected ? colorfulStyle : grayStyle)}
       onEachFeature={(_, layer) => {
+        layer.bindTooltip(name, {
+          sticky: true, 
+          direction: "top", 
+        });
+
         layer.on("click", () => {
           onSelect(isSelected ? null : name);
           if ("getBounds" in layer && typeof layer.getBounds === "function") {

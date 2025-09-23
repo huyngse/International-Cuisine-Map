@@ -2,7 +2,7 @@ import { MapContainer, TileLayer, ZoomControl, GeoJSON } from "react-leaflet";
 import worldData from "@/data/custom.geo.json";
 import type { FeatureCollection } from "geojson";
 import Country from "@/components/Country";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -11,12 +11,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import CountryDetail from "./CountryDetail";
+
 const typedWorldData = worldData as FeatureCollection;
 
 type DisplayMode = "detailed" | "interactive" | "satellite";
 
 const HomePage = () => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("interactive");
 
   const selectedFeature = typedWorldData.features.find(
@@ -70,6 +74,12 @@ const HomePage = () => {
     }
   };
 
+  useEffect(() => {
+    if (selectedCountry && selectedCountry.length > 0) {
+      setDrawerOpen(true);
+    }
+  }, [selectedCountry]);
+
   return (
     <main className="relative">
       <nav className="absolute w-full top-0 left-1/2 transform -translate-x-1/2 z-50 bg-accent p-3 rounded shadow flex gap-3 items-center justify-between">
@@ -90,6 +100,11 @@ const HomePage = () => {
           </Select>
         </div>
       </nav>
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent>
+          {selectedCountry && <CountryDetail country={selectedCountry} />}
+        </DrawerContent>
+      </Drawer>
       <div className="w-full h-screen relative z-0">
         <MapContainer
           center={[35.6895, 139.6917]}
